@@ -1,0 +1,13 @@
+node_modules/
+.env
+.test-workspace/
+*.log
+test/
+BUG.md
+DEV.md
+REQ.md
+TC.md
+package.json
+package-lock.json
+tsconfig.json
+doc/
