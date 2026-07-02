@@ -1,4 +1,4 @@
-# oc-bridge-plugin
+# OpenCodeMirror
 
 Bridge opencode sessions to chat platforms.
 
@@ -25,7 +25,7 @@ Existing community solutions run as standalone external servers:
   but runs as a parallel process outside opencode, not as a native plugin
 - Multiple open GitHub issues request mobile control and network access
 
-oc-bridge is a **super lightweight native opencode plugin** — it runs inside the
+OpenCodeMirror is a **super lightweight native opencode plugin** — it runs inside the
 opencode process itself. No separate server, no extra process, no npm dependencies
 at runtime. It works over the internet with no VPN, no dedicated infrastructure —
 just the opencode TUI and your existing chat account.
@@ -56,8 +56,6 @@ src/
     types.ts         Transport interface (send/start/stop/answerCallback)
     telegram.ts      Telegram Bot API transport (getUpdates long-poll)
     echo.ts          Dry-run transport for tokenless testing
-doc/
-  oc-telebot-design.html   Architecture doc v1.2 (diagrams, data flow, IPC)
 scripts/
   install.sh        Cross-PC installer (shim, tui.json, env setup)
   uninstall.sh      Cleanup (shim, tui.json entry, credentials, state file)
@@ -74,7 +72,7 @@ scripts/
 ### 2. Install the plugin
 
 ```bash
-git clone git@github.com:iceberghbs/oc-bridge-plugin.git ~/oc-bridge && cd ~/oc-bridge && ./scripts/install.sh
+git clone git@github.com:iceberghbs/OpenCodeMirror.git ~/OpenCodeMirror && cd ~/OpenCodeMirror && ./scripts/install.sh
 ```
 
 The installer will:
