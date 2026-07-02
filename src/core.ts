@@ -390,12 +390,16 @@ export class Core {
         entry.answers[qIdx] = [label]
         const remaining = entry.answers.filter((a) => a === null).length
         if (remaining === 0) {
-          await this.questionReply(reqId, entry.answers as unknown[])
           this.pendingQuestions.delete(reqId)
-          setStatus({
-            pendingQuestion: Math.max(0, getStatus().pendingQuestion - 1),
-            replied: getStatus().replied + 1,
-          })
+          setStatus({ pendingQuestion: Math.max(0, getStatus().pendingQuestion - 1) })
+          try {
+            await this.questionReply(reqId, entry.answers as unknown[])
+            setStatus({ replied: getStatus().replied + 1 })
+          } catch (e) {
+            this.pendingQuestions.set(reqId, entry)
+            setStatus({ pendingQuestion: getStatus().pendingQuestion + 1 })
+            throw e
+          }
           await t.answerCallback(callbackId, `✅ ${label}`)
           await this.send({ text: `↩️ all answered: ${entry.answers.map((a) => a?.[0] ?? "—").join(", ")}` })
         } else {
@@ -439,13 +443,18 @@ export class Core {
         await this.send({ text: `↩️ Q1: ${escapeForTg(text.trim().slice(0, 80))}. Still waiting for remaining.` })
         return
       }
-      await this.questionReply(requestID, qEntry.answers as unknown[])
       this.questionMsgs.delete(replyToMessageId)
       this.pendingQuestions.delete(requestID)
-      setStatus({
-        pendingQuestion: Math.max(0, getStatus().pendingQuestion - 1),
-        replied: getStatus().replied + 1,
-      })
+      setStatus({ pendingQuestion: Math.max(0, getStatus().pendingQuestion - 1) })
+      try {
+        await this.questionReply(requestID, qEntry.answers as unknown[])
+        setStatus({ replied: getStatus().replied + 1 })
+      } catch (e) {
+        this.pendingQuestions.set(requestID, qEntry)
+        this.questionMsgs.set(replyToMessageId, msgEntry)
+        setStatus({ pendingQuestion: getStatus().pendingQuestion + 1 })
+        throw e
+      }
       await this.send({ text: `↩️ answered: ${escapeForTg(text.trim().slice(0, 80))}` })
     } catch (e) {
       await this.send({ text: `⚠️ answer failed: <code>${escapeForTg(String(e))}</code>` })
