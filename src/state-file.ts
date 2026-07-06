@@ -81,6 +81,15 @@ export function syncAllowListTitles(titles: Map<string, string>): void {
   if (changed) write(state)
 }
 
+export function updateAllowListTitle(sid: string, title: string): void {
+  const state = readRaw()
+  let changed = false
+  for (const e of state.allowList) {
+    if (e.id === sid && e.title !== title) { e.title = title; changed = true }
+  }
+  if (changed) write(state) // patches existing entries only — never adds
+}
+
 export function removeAllForSession(sid: string): void {
   const state = readRaw()
   state.allowList = state.allowList.filter((e) => e.id !== sid)

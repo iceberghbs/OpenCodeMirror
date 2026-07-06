@@ -1,6 +1,6 @@
 import type { Transport } from "./transports/types.ts"
 import { getStatus, setStatus, type Mode } from "./state.ts"
-import { readStateFile, writeCurrent, resolveTitle, syncAllowListTitles, removeStaleLocalSessions } from "./state-file.ts"
+import { readStateFile, writeCurrent, resolveTitle, syncAllowListTitles, removeStaleLocalSessions, updateAllowListTitle, removeAllForSession } from "./state-file.ts"
 import {
   formatAssistantText,
   formatError,
@@ -180,9 +180,21 @@ export class Core {
       switch (ev.type) {
         case "session.created":
         case "session.updated": {
-          const sid: string | undefined = p?.sessionID
+          const sid: string | undefined = p?.sessionID ?? p?.info?.id
           const title: string | undefined = p?.info?.title
-          if (sid && title) this.sessionTitles.set(sid, title)
+          if (sid && title) {
+            this.sessionTitles.set(sid, title)
+            updateAllowListTitle(sid, title)
+          }
+          break
+        }
+        case "session.deleted": {
+          const sid: string | undefined = p?.sessionID ?? p?.info?.id
+          if (sid) {
+            removeAllForSession(sid)
+            this.sessionTitles.delete(sid)
+            readStateFile() // heal stale `current` immediately
+          }
           break
         }
         case "session.idle": {

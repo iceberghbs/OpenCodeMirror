@@ -3,7 +3,7 @@ import { Core, type OcEvent } from "./core.ts"
 import { createTelegramTransport } from "./transports/telegram.ts"
 import { createEchoTransport } from "./transports/echo.ts"
 import { setStatus, type Mode } from "./state.ts"
-import { readStateFile, writeCurrent, addToAllowList, removeAllForPid } from "./state-file.ts"
+import { readStateFile, writeCurrent, removeAllForPid } from "./state-file.ts"
 import { readFileSync, appendFileSync } from "node:fs"
 
 const SELF_CHECK_MS = 2000
@@ -138,17 +138,7 @@ const ocTelebot: Plugin = async ({ client }) => {
       if (dumpStream) {
         dumpWrite(JSON.stringify({ seq: ++dumpSeq, ts: Date.now(), type: ev.type, id: ev.id, properties: ev.properties }))
       }
-      // Register new sessions in allowList so other instances see them
-      if (ev?.type === "session.created" || ev?.type === "session.updated") {
-        const sid: string | undefined = ev.properties?.sessionID
-        const title: string | undefined = ev.properties?.info?.title
-        if (sid && !readStateFile().allowList.some((e) => e.id === sid && e.pid === process.pid)) {
-          addToAllowList(sid, title || "(untitled)", process.pid, process.cwd())
-        }
-        core?.handleEvent(ev)
-      } else {
-        void core?.handleEvent(ev)
-      }
+      void core?.handleEvent(ev)
     }
 
     pluginOutput = {
